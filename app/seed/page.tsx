@@ -4,13 +4,15 @@ import { useState } from "react";
 
 export default function Page() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
+  const [seed, setSeed] = useState<Buffer | null>(null);
 
   function generateMnemonic() {
-    const str = bip39.generateMnemonic();
-    setMnemonic(str.split(" "));
-    if (mnemonic) {
-      console.log(mnemonic);
-    }
+    const generatedMnemonic = bip39.generateMnemonic();
+    setMnemonic(generatedMnemonic.split(" "));
+
+    const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic, "");
+    setSeed(generatedSeed);
+    console.log(generatedSeed.toString("hex"));
   }
 
   return (
