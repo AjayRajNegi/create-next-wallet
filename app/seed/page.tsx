@@ -4,53 +4,83 @@ import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
 import { useState } from "react";
 
+interface WalletData {
+  keyPair: Keypair;
+  publicKey: string;
+  privateKey: string;
+}
+
 export default function Page() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
-  const [keyPair, setKeyPair] = useState<Keypair | null>(null);
+  const [wallet, setWallet] = useState<WalletData[]>([]);
 
-  function generateMnemonic() {
+  // Generate Mnemonics
+  async function generateMnemonic() {
     const generatedMnemonic = bip39.generateMnemonic();
     setMnemonic(generatedMnemonic.split(" "));
 
     const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic, "");
     setSeed(generatedSeed);
-    console.log(generatedSeed.toString("hex"));
+
+    await generateWallet(generatedSeed);
   }
 
-  function generateKeyPair() {
-    const path = `m/44'/501'/0'/0'`;
+  // Generate Wallets
+  async function generateWallet(seed: Buffer | null) {
     if (!seed) {
+      alert("Generate Mnemonics!!");
       return;
     }
+
+    const walletIndex = wallet.length;
+    const path = `m/44'/501'/${walletIndex}'/0'`;
     const derivedSeed = derivePath(path, seed.toString("hex")).key;
     const keyPair = Keypair.fromSeed(derivedSeed);
 
-    setKeyPair(keyPair);
+    const newWallet: WalletData = {
+      keyPair,
+      publicKey: keyPair.publicKey.toBase58(),
+      privateKey: Buffer.from(keyPair.secretKey).toString("hex"),
+    };
 
-    console.log("Public key:", keyPair.publicKey.toBase58());
-    console.log("Private key:", Buffer.from(keyPair.secretKey).toString("hex"));
+    setWallet((prev) => [...prev, newWallet]);
+  }
+
+  // Clear Wallets
+  function clearWallet() {
+    setMnemonic([]);
+    setSeed(null);
+    setWallet([]);
+  }
+
+  // Delete Single Wallet
+  function deleteWallet(id: number) {
+    setWallet(wallet.filter((ele) => wallet.indexOf(ele) !== id));
+    console.log(wallet.length);
+    if (wallet.length === 1) {
+      clearWallet();
+    }
   }
 
   return (
     <>
       <section className="max-w-7xl mx-auto bg-secondary py-10">
-        <h1 className="text-5xl p-5">Create Solana Wallet</h1>
+        <h1 className="text-5xl py-10 max-w-6xl mx-auto text-center">
+          create-next-wallet@latest
+        </h1>
         <div className="max-w-6xl mx-auto flex justify-between">
-          <button className="px-4 py-1 text-primary bg-muted-foreground">
-            Add Your Mnemonics +
-          </button>
           <button
-            className="px-4 py-1 text-primary bg-muted-foreground"
+            className="py-5 text-primary-foreground bg-muted-foreground w-full"
             onClick={() => {
               generateMnemonic();
             }}
           >
-            Generate +
+            Generate Your Mnemonics
           </button>
         </div>
 
-        <div className="flex gap-4 max-w-6xl mx-auto mt-5">
+        <div className="flex justify-between max-w-6xl mx-auto mt-5">
           {mnemonic.map((word, id) => (
             <div className="px-3 py-1 bg-muted-foreground text-white" key={id}>
               {word}
@@ -58,7 +88,61 @@ export default function Page() {
           ))}
         </div>
 
-        <div className=" gap-4 max-w-6xl mx-auto mt-10">
+        {/* Wallet */}
+        <section className="max-w-6xl mx-auto mt-20">
+          <div className="flex justify-between items-center">
+            <h1 className="text-5xl font-[500] ">Solana Wallet</h1>
+            <div>
+              <button
+                className="px-4 py-2 text-muted-foreground bg-primary-foreground border-[1px] border-border mr-2"
+                onClick={() => {
+                  generateWallet(seed);
+                }}
+              >
+                Add Wallet
+              </button>
+              <button
+                className="px-4 py-2 text-primary-foreground bg-destructive border-[1px] border-border"
+                onClick={() => {
+                  clearWallet();
+                }}
+              >
+                Clear Wallet
+              </button>
+            </div>
+          </div>
+
+          {/* All Wallets */}
+          <div className="flex gap-1 flex-col">
+            {wallet.map((wallet, id) => (
+              <div
+                key={id}
+                className="tracking-tighter text-base p-4 bg-foreground/80 text-white "
+              >
+                <h4 className="text-white/80 text-3xl font-[600] flex justify-between items-center">
+                  Wallet{id}
+                  <button
+                    className="bg-destructive px-3 py-1 w-fit h-fit text-xs"
+                    onClick={() => {
+                      deleteWallet(id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </h4>
+                <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white border-[0.5px] border-white/40">
+                  <p>Public Key</p>
+                  <p>{wallet.publicKey}</p>
+                </div>
+                <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white">
+                  <p>Private Key</p>
+                  <p>{wallet.publicKey}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        {/* <div className=" gap-4 max-w-6xl mx-auto mt-10">
           <div
             className="px-4 py-1 text-accent bg-muted-foreground text-center "
             onClick={() => {
@@ -85,7 +169,7 @@ export default function Page() {
               )}
             </h3>
           </div>
-        </div>
+        </div> */}
       </section>
     </>
   );
