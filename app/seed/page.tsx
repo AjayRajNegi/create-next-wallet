@@ -54,6 +54,15 @@ export default function Page() {
     setWallet([]);
   }
 
+  // Delete Single Wallet
+  function deleteWallet(id: number) {
+    setWallet(wallet.filter((ele) => wallet.indexOf(ele) !== id));
+    console.log(wallet.length);
+    if (wallet.length === 1) {
+      clearWallet();
+    }
+  }
+
   return (
     <>
       <section className="max-w-7xl mx-auto bg-secondary py-10">
@@ -82,7 +91,7 @@ export default function Page() {
         {/* Wallet */}
         <section className="max-w-6xl mx-auto mt-20">
           <div className="flex justify-between items-center">
-            <h1 className="text-5xl font-[500]">Solana Wallet</h1>
+            <h1 className="text-5xl font-[500] ">Solana Wallet</h1>
             <div>
               <button
                 className="px-4 py-2 text-muted-foreground bg-primary-foreground border-[1px] border-border mr-2"
@@ -110,8 +119,16 @@ export default function Page() {
                 key={id}
                 className="tracking-tighter text-base p-4 bg-foreground/80 text-white "
               >
-                <h4 className="text-white/80 text-3xl font-[600]">
+                <h4 className="text-white/80 text-3xl font-[600] flex justify-between items-center">
                   Wallet{id}
+                  <button
+                    className="bg-destructive px-3 py-1 w-fit h-fit text-xs"
+                    onClick={() => {
+                      deleteWallet(id);
+                    }}
+                  >
+                    Delete
+                  </button>
                 </h4>
                 <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white border-[0.5px] border-white/40">
                   <p>Public Key</p>
