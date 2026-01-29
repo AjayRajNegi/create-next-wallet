@@ -2,7 +2,7 @@
 import { Keypair } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
-import { useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 interface WalletData {
   keyPair: Keypair;
@@ -13,15 +13,36 @@ interface WalletData {
 export default function Page() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
-  const [wallet, setWallet] = useState<WalletData[]>([]);
+  const [wallets, setWallets] = useState<WalletData[]>([]);
+
+  // Get the values from localStorage
+  const onMount = useEffectEvent(() => {
+    const storedMnemonic = localStorage.getItem("mnemonic");
+    const storedSeed = localStorage.getItem("seed");
+    const storedWallets = localStorage.getItem("wallets");
+
+    if (storedMnemonic && storedSeed && storedWallets) {
+      setMnemonic(JSON.parse(storedMnemonic));
+      setSeed(Buffer.from(storedSeed, "hex"));
+      setWallets(JSON.parse(storedWallets));
+    }
+  });
+
+  useEffect(() => {
+    onMount();
+  }, []);
 
   // Generate Mnemonics
   async function generateMnemonic() {
     const generatedMnemonic = bip39.generateMnemonic();
-    setMnemonic(generatedMnemonic.split(" "));
+    const words = generatedMnemonic.split(" ");
 
-    const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic, "");
+    setMnemonic(words);
+    localStorage.setItem("mnemonic", JSON.stringify(words));
+
+    const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
     setSeed(generatedSeed);
+    localStorage.setItem("seed", generatedSeed.toString("hex"));
 
     await generateWallet(generatedSeed);
   }
@@ -29,38 +50,48 @@ export default function Page() {
   // Generate Wallets
   async function generateWallet(seed: Buffer | null) {
     if (!seed) {
-      alert("Generate Mnemonics!!");
+      alert("Generate Mnemonics first!");
       return;
     }
 
-    const walletIndex = wallet.length;
-    const path = `m/44'/501'/${walletIndex}'/0'`;
-    const derivedSeed = derivePath(path, seed.toString("hex")).key;
-    const keyPair = Keypair.fromSeed(derivedSeed);
+    setWallets((prev) => {
+      const walletIndex = prev.length;
+      const path = `m/44'/501'/${walletIndex}'/0'`;
+      const derivedSeed = derivePath(path, seed.toString("hex")).key;
+      const keyPair = Keypair.fromSeed(derivedSeed);
 
-    const newWallet: WalletData = {
-      keyPair,
-      publicKey: keyPair.publicKey.toBase58(),
-      privateKey: Buffer.from(keyPair.secretKey).toString("hex"),
-    };
+      const newWallet: WalletData = {
+        keyPair,
+        publicKey: keyPair.publicKey.toBase58(),
+        privateKey: Buffer.from(keyPair.secretKey).toString("hex"),
+      };
 
-    setWallet((prev) => [...prev, newWallet]);
+      const updated = [...prev, newWallet];
+      localStorage.setItem("wallets", JSON.stringify(updated));
+      return updated;
+    });
   }
 
   // Clear Wallets
   function clearWallet() {
     setMnemonic([]);
     setSeed(null);
-    setWallet([]);
+    setWallets([]);
+    localStorage.clear();
   }
 
   // Delete Single Wallet
   function deleteWallet(id: number) {
-    setWallet(wallet.filter((ele) => wallet.indexOf(ele) !== id));
-    console.log(wallet.length);
-    if (wallet.length === 1) {
-      clearWallet();
-    }
+    setWallets((prev) => {
+      const updated = prev.filter((_, index) => index !== id);
+      localStorage.setItem("wallets", JSON.stringify(updated));
+
+      if (updated.length === 0) {
+        clearWallet();
+      }
+
+      return updated;
+    });
   }
 
   return (
@@ -114,7 +145,7 @@ export default function Page() {
 
           {/* All Wallets */}
           <div className="flex gap-1 flex-col">
-            {wallet.map((wallet, id) => (
+            {wallets.map((wallet, id) => (
               <div
                 key={id}
                 className="tracking-tighter text-base p-4 bg-foreground/80 text-white "
