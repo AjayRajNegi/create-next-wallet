@@ -13,10 +13,9 @@ interface WalletData {
 export default function Page() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
-  //const [keyPair, setKeyPair] = useState<Keypair | null>(null);
-
   const [wallet, setWallet] = useState<WalletData[]>([]);
 
+  // Generate Mnemonics
   async function generateMnemonic() {
     const generatedMnemonic = bip39.generateMnemonic();
     setMnemonic(generatedMnemonic.split(" "));
@@ -27,6 +26,7 @@ export default function Page() {
     await generateWallet(generatedSeed);
   }
 
+  // Generate Wallets
   async function generateWallet(seed: Buffer | null) {
     if (!seed) {
       alert("Generate Mnemonics!!");
@@ -34,7 +34,6 @@ export default function Page() {
     }
 
     const walletIndex = wallet.length;
-
     const path = `m/44'/501'/${walletIndex}'/0'`;
     const derivedSeed = derivePath(path, seed.toString("hex")).key;
     const keyPair = Keypair.fromSeed(derivedSeed);
@@ -48,10 +47,19 @@ export default function Page() {
     setWallet((prev) => [...prev, newWallet]);
   }
 
+  // Clear Wallets
+  function clearWallet() {
+    setMnemonic([]);
+    setSeed(null);
+    setWallet([]);
+  }
+
   return (
     <>
       <section className="max-w-7xl mx-auto bg-secondary py-10">
-        <h1 className="text-5xl p-5">Create Solana Wallet</h1>
+        <h1 className="text-5xl py-10 max-w-6xl mx-auto text-center">
+          create-next-wallet@latest
+        </h1>
         <div className="max-w-6xl mx-auto flex justify-between">
           <button
             className="py-5 text-primary-foreground bg-muted-foreground w-full"
@@ -84,17 +92,35 @@ export default function Page() {
               >
                 Add Wallet
               </button>
-              <button className="px-4 py-2 text-primary-foreground bg-destructive border-[1px] border-border">
+              <button
+                className="px-4 py-2 text-primary-foreground bg-destructive border-[1px] border-border"
+                onClick={() => {
+                  clearWallet();
+                }}
+              >
                 Clear Wallet
               </button>
             </div>
           </div>
 
           {/* All Wallets */}
-          <div className="flex gap-10 flex-col">
+          <div className="flex gap-1 flex-col">
             {wallet.map((wallet, id) => (
-              <div key={id} className="">
-                {wallet.privateKey}
+              <div
+                key={id}
+                className="tracking-tighter text-base p-4 bg-foreground/80 text-white "
+              >
+                <h4 className="text-white/80 text-3xl font-[600]">
+                  Wallet{id}
+                </h4>
+                <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white border-[0.5px] border-white/40">
+                  <p>Public Key</p>
+                  <p>{wallet.publicKey}</p>
+                </div>
+                <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white">
+                  <p>Private Key</p>
+                  <p>{wallet.publicKey}</p>
+                </div>
               </div>
             ))}
           </div>
