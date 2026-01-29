@@ -17,18 +17,19 @@ export default function Page() {
 
   const [wallet, setWallet] = useState<WalletData[]>([]);
 
-  function generateMnemonic() {
+  async function generateMnemonic() {
     const generatedMnemonic = bip39.generateMnemonic();
     setMnemonic(generatedMnemonic.split(" "));
 
     const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic, "");
     setSeed(generatedSeed);
-    console.log(generatedSeed.toString("hex"));
+
+    await generateWallet(generatedSeed);
   }
 
-  function generateWallet() {
+  async function generateWallet(seed: Buffer | null) {
     if (!seed) {
-      console.log("Generate Seed.");
+      alert("Generate Mnemonics!!");
       return;
     }
 
@@ -78,7 +79,7 @@ export default function Page() {
               <button
                 className="px-4 py-2 text-muted-foreground bg-primary-foreground border-[1px] border-border mr-2"
                 onClick={() => {
-                  generateWallet();
+                  generateWallet(seed);
                 }}
               >
                 Add Wallet
