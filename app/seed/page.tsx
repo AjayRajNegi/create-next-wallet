@@ -1,4 +1,16 @@
 "use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Keypair } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
@@ -95,113 +107,123 @@ export default function Page() {
   }
 
   return (
-    <>
-      <section className="max-w-7xl mx-auto bg-secondary py-10">
-        <h1 className="text-5xl py-10 max-w-6xl mx-auto text-center">
-          create-next-wallet@latest
-        </h1>
-        <div className="max-w-6xl mx-auto flex justify-between">
-          <button
-            className="py-5 text-primary-foreground bg-muted-foreground w-full"
-            onClick={() => {
-              generateMnemonic();
-            }}
-          >
-            Generate Your Mnemonics
-          </button>
-        </div>
+    <div className="bg-background max-w-7xl mx-auto min-h-screen border-border border-1 ">
+      <section className="max-w-7xl mx-auto py-10">
+        <Card className="mx-5 shadow-xl">
+          <CardHeader className="text-center space-y-2">
+            <CardTitle className="text-5xl">
+              create-next-wallet@latest
+            </CardTitle>
+            <CardDescription>
+              Securely generate your wallet mnemonic phrase
+            </CardDescription>
+          </CardHeader>
 
-        <div className="flex justify-between max-w-6xl mx-auto mt-5">
-          {mnemonic.map((word, id) => (
-            <div className="px-3 py-1 bg-muted-foreground text-white" key={id}>
-              {word}
-            </div>
-          ))}
-        </div>
+          <CardContent>
+            <Button className="w-full" size="lg" onClick={generateMnemonic}>
+              Generate Your Mnemonics
+            </Button>
+
+            {mnemonic.length > 0 && (
+              <Card className="mt-2 p-2 py-2.5 rounded-md">
+                <CardContent className="flex justify-between ">
+                  {mnemonic.map((word, id) => (
+                    <div key={id} className="justify-center  text-sm">
+                      {word}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </CardContent>
+
+          <CardFooter className="text-xs text-muted-foreground text-center justify-center">
+            Never share your mnemonic phrase with anyone.
+          </CardFooter>
+        </Card>
 
         {/* Wallet */}
-        <section className="max-w-6xl mx-auto mt-20">
-          <div className="flex justify-between items-center">
-            <h1 className="text-5xl font-[500] ">Solana Wallet</h1>
-            <div>
-              <button
-                className="px-4 py-2 text-muted-foreground bg-primary-foreground border-[1px] border-border mr-2"
-                onClick={() => {
-                  generateWallet(seed);
-                }}
+        <section className="max-w-7xl mt-5 flex justify-evenly ">
+          {/* New Wallet */}
+          <Card className="w-[25%] max-h-[215px] shrink-0 shadow-2xl">
+            <CardHeader>
+              <CardTitle className="text-4xl">Solana Wallets</CardTitle>
+              <CardDescription>Manage your solana wallets.</CardDescription>
+            </CardHeader>
+
+            <CardFooter className="flex flex-col gap-2">
+              <Button
+                size="sm"
+                className="w-full shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] "
+                onClick={() => generateWallet(seed)}
               >
                 Add Wallet
-              </button>
-              <button
-                className="px-4 py-2 text-primary-foreground bg-destructive border-[1px] border-border"
-                onClick={() => {
-                  clearWallet();
-                }}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="w-full shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]"
+                onClick={clearWallet}
               >
                 Clear Wallet
-              </button>
-            </div>
-          </div>
+              </Button>
+            </CardFooter>
+          </Card>
 
           {/* All Wallets */}
-          <div className="flex gap-1 flex-col">
-            {wallets.map((wallet, id) => (
-              <div
-                key={id}
-                className="tracking-tighter text-base p-4 bg-foreground/80 text-white "
-              >
-                <h4 className="text-white/80 text-3xl font-[600] flex justify-between items-center">
-                  Wallet{id}
-                  <button
-                    className="bg-destructive px-3 py-1 w-fit h-fit text-xs"
-                    onClick={() => {
-                      deleteWallet(id);
-                    }}
-                  >
-                    Delete
-                  </button>
-                </h4>
-                <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white border-[0.5px] border-white/40">
-                  <p>Public Key</p>
-                  <p>{wallet.publicKey}</p>
-                </div>
-                <div className="tracking-tighter text-base p-4 bg-foreground/80 text-white">
-                  <p>Private Key</p>
-                  <p>{wallet.publicKey}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        {/* <div className=" gap-4 max-w-6xl mx-auto mt-10">
-          <div
-            className="px-4 py-1 text-accent bg-muted-foreground text-center "
-            onClick={() => {
-              generateKeyPair();
-            }}
+          <ScrollArea
+            className="
+      w-[70%]
+      h-[60vh]
+      rounded-xl
+      border
+      overflow-hidden
+      [&_[data-radix-scroll-area-scrollbar]]:hidden
+      [&_[data-radix-scroll-area-viewport]]:pr-0
+          shadow-2xl bg-card/40
+    "
           >
-            Show
-          </div>
-          <div className="bg-background text-foreground p-4 shadow-lg shadow-accent-foreground">
-            <h3>
-              <span className="bg-muted-foreground px-4 py-2 mr-2 text-primary">
-                Public Key <br />
-              </span>
-              {keyPair?.publicKey.toBase58()}
-            </h3>
-            <h3 className="">
-              <span className="bg-muted-foreground px-4 py-2 mr-2 text-primary break-all">
-                Private Key <br />
-              </span>
-              {keyPair?.secretKey ? (
-                <>{Buffer.from(keyPair.secretKey).toString("hex")}</>
-              ) : (
-                <></>
-              )}
-            </h3>
-          </div>
-        </div> */}
+            {/* Viewport content */}
+            <div className="flex flex-col gap-3 p-4">
+              {wallets.map((wallet, id) => (
+                <Card key={id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center justify-between text-2xl tracking-tight">
+                      Wallet {id}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:-translate-x-[1px] hover:-translate-y-[1px]"
+                        onClick={() => deleteWallet(id)}
+                      >
+                        Delete
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Public Key
+                      </p>
+                      <p className="break-all">{wallet.publicKey}</p>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Private Key
+                      </p>
+                      <p className="break-all">{wallet.privateKey}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        </section>
       </section>
-    </>
+    </div>
   );
 }

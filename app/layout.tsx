@@ -19,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${oxanium.variable}  antialiased`}>{children}</body>
+      <body className={`${oxanium.variable} antialiased bg-background`}>
+        {children}
+      </body>
     </html>
   );
 }
