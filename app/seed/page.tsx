@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Keypair } from "@solana/web3.js";
@@ -118,7 +117,7 @@ export default function Page() {
   return (
     <div className="bg-background mx-auto min-h-screen max-w-7xl">
       <section className="mx-auto mt-5 max-w-7xl">
-        <Card className="mx-5 border-2 border-black/50 shadow-xl">
+        <Card className="mx-5 border-2 border-black/70 shadow-xl">
           <CardHeader className="space-y-2 text-center">
             <CardTitle className="text-5xl">
               create-next-wallet@latest
@@ -143,7 +142,7 @@ export default function Page() {
         {/* Wallet */}
         <section className="mt-5 flex max-w-7xl justify-evenly">
           {/* New Wallet */}
-          <Card className="h-fit w-[25%] shrink-0 border-2 border-black/50 shadow-2xl">
+          <Card className="h-fit w-[25%] shrink-0 border-2 border-black/70 shadow-2xl">
             <CardHeader>
               <CardTitle className="text-4xl">Solana Wallets</CardTitle>
               <CardDescription>Manage your solana wallets.</CardDescription>
@@ -169,11 +168,11 @@ export default function Page() {
           </Card>
 
           {/* All Wallets */}
-          <ScrollArea className="bg-card/40 h-[60vh] w-[70%] overflow-hidden rounded-xl border-2 border-black/50 shadow-2xl [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
+          <ScrollArea className="bg-card/40 h-[60vh] w-[70%] overflow-hidden rounded-xl border-2 border-black/70 shadow-2xl [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
             {/* Viewport content */}
             <div className="flex flex-col gap-3 p-4">
               {wallets.map((wallet, id) => (
-                <Card key={id} className="border-2 border-black/50">
+                <Card key={id} className="border-2 border-black/70">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center justify-between text-2xl tracking-tight">
                       Wallet {id}

@@ -15,7 +15,7 @@ export function ViewMnemonics({ mnemonic }: { mnemonic: string[] }) {
     <div className="mt-1">
       <Drawer direction="top">
         <DrawerTrigger className="w-full">
-          <div className="bg-primary text-card flex w-full flex-row items-center justify-center rounded-md py-2 text-[15px]">
+          <div className="flex w-full flex-row items-center justify-center rounded-md border-2 border-black/70 bg-white py-2 text-[15px] text-black">
             <p>View Your Mnemonics</p>
             <ChevronDown className="ml-2 -rotate-90" size={18} />
           </div>
