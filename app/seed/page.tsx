@@ -1,5 +1,7 @@
 "use client";
 
+import { ViewCredentials } from "@/components/components/ViewCredentials";
+import { ViewMnemonics } from "@/components/components/ViewMnemonics";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Keypair } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
+import { ChevronDown, View } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 interface WalletData {
@@ -107,10 +110,10 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-background max-w-7xl mx-auto min-h-screen border-border border-1 ">
-      <section className="max-w-7xl mx-auto py-10">
-        <Card className="mx-5 shadow-xl">
-          <CardHeader className="text-center space-y-2">
+    <div className="bg-background mx-auto min-h-screen max-w-7xl">
+      <section className="mx-auto mt-5 max-w-7xl">
+        <Card className="mx-5 border-2 border-black/50 shadow-xl">
+          <CardHeader className="space-y-2 text-center">
             <CardTitle className="text-5xl">
               create-next-wallet@latest
             </CardTitle>
@@ -121,31 +124,20 @@ export default function Page() {
 
           <CardContent>
             <Button className="w-full" size="lg" onClick={generateMnemonic}>
-              Generate Your Mnemonics
+              Generate Your Mnemonics <ChevronDown className="-rotate-90" />
             </Button>
-
-            {mnemonic.length > 0 && (
-              <Card className="mt-2 p-2 py-2.5 rounded-md">
-                <CardContent className="flex justify-between ">
-                  {mnemonic.map((word, id) => (
-                    <div key={id} className="justify-center  text-sm">
-                      {word}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+            <ViewMnemonics mnemonic={mnemonic} />
           </CardContent>
 
-          <CardFooter className="text-xs text-muted-foreground text-center justify-center">
+          <CardFooter className="text-muted-foreground justify-center text-center text-xs">
             Never share your mnemonic phrase with anyone.
           </CardFooter>
         </Card>
 
         {/* Wallet */}
-        <section className="max-w-7xl mt-5 flex justify-evenly ">
+        <section className="mt-5 flex max-w-7xl justify-evenly">
           {/* New Wallet */}
-          <Card className="w-[25%] max-h-[215px] shrink-0 shadow-2xl">
+          <Card className="h-fit w-[25%] shrink-0 border-2 border-black/50 shadow-2xl">
             <CardHeader>
               <CardTitle className="text-4xl">Solana Wallets</CardTitle>
               <CardDescription>Manage your solana wallets.</CardDescription>
@@ -154,7 +146,7 @@ export default function Page() {
             <CardFooter className="flex flex-col gap-2">
               <Button
                 size="sm"
-                className="w-full shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] "
+                className="w-full shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none"
                 onClick={() => generateWallet(seed)}
               >
                 Add Wallet
@@ -162,7 +154,7 @@ export default function Page() {
               <Button
                 variant="destructive"
                 size="sm"
-                className="w-full shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]"
+                className="w-full shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none"
                 onClick={clearWallet}
               >
                 Clear Wallet
@@ -171,39 +163,31 @@ export default function Page() {
           </Card>
 
           {/* All Wallets */}
-          <ScrollArea
-            className="
-      w-[70%]
-      h-[60vh]
-      rounded-xl
-      border
-      overflow-hidden
-      [&_[data-radix-scroll-area-scrollbar]]:hidden
-      [&_[data-radix-scroll-area-viewport]]:pr-0
-          shadow-2xl bg-card/40
-    "
-          >
+          <ScrollArea className="bg-card/40 h-[60vh] w-[70%] overflow-hidden rounded-xl border-2 border-black/50 shadow-2xl [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
             {/* Viewport content */}
             <div className="flex flex-col gap-3 p-4">
               {wallets.map((wallet, id) => (
-                <Card key={id}>
+                <Card key={id} className="border-2 border-black/50">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center justify-between text-2xl tracking-tight">
                       Wallet {id}
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:-translate-x-[1px] hover:-translate-y-[1px]"
-                        onClick={() => deleteWallet(id)}
-                      >
-                        Delete
-                      </Button>
+                      <div className="flex gap-1">
+                        <ViewCredentials publicKey={wallet.publicKey} />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="border-destructive shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)]"
+                          onClick={() => deleteWallet(id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </CardTitle>
                   </CardHeader>
 
                   <CardContent className="space-y-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Public Key
                       </p>
                       <p className="break-all">{wallet.publicKey}</p>
@@ -212,7 +196,7 @@ export default function Page() {
                     <Separator />
 
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Private Key
                       </p>
                       <p className="break-all">{wallet.privateKey}</p>
