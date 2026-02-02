@@ -11,12 +11,25 @@ export default function Page() {
     async function fetchBalance() {
       setLoading(true);
       try {
-        const connection = new Connection(
-          "https://api.devnet.solana.com",
-          "confirmed",
-        );
-        const pubKey = new PublicKey(publicKey);
-        const balanceInLamports = await connection.getBalance(pubKey);
+        // const connection = new Connection(
+        //   "https://api.devnet.solana.com",
+        //   "confirmed",
+        // );
+        // const pubKey = new PublicKey(publicKey);
+        // const balanceInLamports = await connection.getBalance(pubKey);
+
+        const response = await fetch("https://api.devnet.solana.com", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "getBalance",
+            params: [publicKey],
+          }),
+        });
+        const data = await response.json();
+        const balanceInLamports = data.result.value;
         setBalance(balanceInLamports / LAMPORTS_PER_SOL);
       } catch (error) {
         console.error("Error:", error);

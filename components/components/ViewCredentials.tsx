@@ -1,19 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "../ui/card";
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "../ui/drawer";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Eye, EyeOff } from "lucide-react";
 
 export function ViewCredentials({ publicKey }: { publicKey: string }) {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   async function getBalance() {
     setLoading(true);
@@ -31,6 +36,11 @@ export function ViewCredentials({ publicKey }: { publicKey: string }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(publicKey);
+    alert("Private key copied!");
   }
 
   return (
@@ -59,6 +69,33 @@ export function ViewCredentials({ publicKey }: { publicKey: string }) {
                 </>
               )}
             </DrawerTitle>
+            <DrawerDescription>
+              <Input
+                type={`${isVisible ? "text" : "password"}`}
+                className="private"
+                value={publicKey}
+                disabled
+              />
+              <Button
+                onClick={() => {
+                  setIsVisible(!isVisible);
+                }}
+                className="eyeButton"
+              >
+                {isVisible ? (
+                  <>
+                    <Eye />
+                  </>
+                ) : (
+                  <>
+                    <EyeOff />
+                  </>
+                )}
+              </Button>
+              <Button onClick={copyToClipboard} className="copyButton">
+                Copy
+              </Button>
+            </DrawerDescription>
           </DrawerHeader>
           <DrawerFooter className="pt-0">
             <DrawerClose>

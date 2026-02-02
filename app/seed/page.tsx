@@ -11,12 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Keypair } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
-import { ChevronDown, View } from "lucide-react";
+import { ChevronDown, Eye, EyeOff } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 interface WalletData {
@@ -29,6 +30,7 @@ export default function Page() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Get the values from localStorage
   const onMount = useEffectEvent(() => {
@@ -109,6 +111,10 @@ export default function Page() {
     });
   }
 
+  function copyToClipboard(privateKey: string) {
+    navigator.clipboard.writeText(privateKey);
+    alert("Private key copied!");
+  }
   return (
     <div className="bg-background mx-auto min-h-screen max-w-7xl">
       <section className="mx-auto mt-5 max-w-7xl">
@@ -199,7 +205,47 @@ export default function Page() {
                       <p className="text-muted-foreground text-sm">
                         Private Key
                       </p>
-                      <p className="break-all">{wallet.privateKey}</p>
+                      <div className="flex items-center justify-between">
+                        {isVisible ? (
+                          <>
+                            <p className="max-w-full break-all">
+                              {wallet.privateKey}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p>
+                              ************************************************************************************
+                            </p>
+                          </>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => {
+                              setIsVisible(!isVisible);
+                            }}
+                            className="eyeButton"
+                          >
+                            {isVisible ? (
+                              <>
+                                <Eye />
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff />
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              copyToClipboard(wallet.privateKey);
+                            }}
+                            className="copyButton"
+                          >
+                            Copy
+                          </Button>
+                        </div>
+                      </div>{" "}
                     </div>
                   </CardContent>
                 </Card>
