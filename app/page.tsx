@@ -6,6 +6,8 @@ import { Keypair } from "@solana/web3.js";
 import { derivePath } from "ed25519-hd-key";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface WalletData {
   keyPair: Keypair;
@@ -17,6 +19,7 @@ export default function Home() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
+  const [inputMnemonic, setInputMnemonic] = useState<string>("");
 
   const onMount = useEffectEvent(() => {
     const storedMnemonic = localStorage.getItem("mnemonic");
@@ -39,19 +42,19 @@ export default function Home() {
   }, [seed, mnemonic, router, wallets]);
 
   async function generateMnemonic() {
-    if (mnemonic.length === 0) {
-      const generatedMnemonic = bip39.generateMnemonic();
-      const words = generatedMnemonic.split(" ");
+    const generatedMnemonic = bip39.generateMnemonic();
+    const words = generatedMnemonic.split(" ");
 
-      setMnemonic(words);
-      localStorage.setItem("mnemonic", JSON.stringify(words));
+    setMnemonic(words);
+    localStorage.setItem("mnemonic", JSON.stringify(words));
+    console.log(generatedMnemonic);
 
-      const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
-      setSeed(generatedSeed);
-      localStorage.setItem("seed", generatedSeed.toString("hex"));
+    const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
+    setSeed(generatedSeed);
+    localStorage.setItem("seed", generatedSeed.toString("hex"));
 
-      await generateWallet(generatedSeed);
-    }
+    await generateWallet(generatedSeed);
+
     return;
   }
 
@@ -78,11 +81,49 @@ export default function Home() {
       return updated;
     });
   }
+
+  async function generateSeedFromInputMnemonics() {
+    if (inputMnemonic.length !== 0) {
+      const seedFromInput = bip39.mnemonicToSeedSync(inputMnemonic);
+      setSeed(seedFromInput);
+      const words = inputMnemonic.split(" ");
+      localStorage.setItem("mnemonic", JSON.stringify(words));
+      localStorage.setItem("seed", seedFromInput.toString("hex"));
+      await generateWallet(seedFromInput);
+      await router.push("/seed");
+    }
+    return;
+  }
   return (
-    <>
-      <Button className="w-full" size="lg" onClick={generateMnemonic}>
-        Generate Your Mnemonics <ChevronDown className="-rotate-90" />
-      </Button>
-    </>
+    <section className="flex h-screen items-center justify-center">
+      <Card className="w-5xl border-[2px] border-black/80 text-black">
+        <CardHeader>Add/Generate your phrases</CardHeader>
+        <CardContent className="flex w-full items-center">
+          <Input
+            type="text"
+            className="mr-[3px] h-[40px] rounded-r-none"
+            onChange={(e) => setInputMnemonic(e.target.value)}
+          />
+          <Button
+            className="rounded-none border-r-2 border-white"
+            size="lg"
+            onClick={() => {
+              generateSeedFromInputMnemonics();
+            }}
+          >
+            Add
+          </Button>
+
+          <Button
+            className="rounded-l-none"
+            size="lg"
+            onClick={generateMnemonic}
+          >
+            Generate
+            <ChevronDown className="-rotate-90" />
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
   );
 }

@@ -11,6 +11,18 @@ import {
 import { Card, CardContent } from "../ui/card";
 
 export function ViewMnemonics({ mnemonic }: { mnemonic: string[] }) {
+  function copyToClipboard() {
+    let allMnemonics: string = "";
+    mnemonic.forEach((element, id) => {
+      if (id !== 0) {
+        allMnemonics = allMnemonics + " " + element;
+      } else if (id === 0) {
+        allMnemonics = element;
+      }
+    });
+    navigator.clipboard.writeText(allMnemonics);
+    alert("Private key copied!");
+  }
   return (
     <div className="mt-1">
       <Drawer direction="top">
@@ -36,6 +48,13 @@ export function ViewMnemonics({ mnemonic }: { mnemonic: string[] }) {
                 </CardContent>
               </Card>
             )}
+            <Card
+              onClick={() => {
+                copyToClipboard();
+              }}
+            >
+              Copy
+            </Card>
           </DrawerHeader>
           <DrawerFooter className="pt-0">
             <DrawerClose>
