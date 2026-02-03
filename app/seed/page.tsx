@@ -1,7 +1,7 @@
 "use client";
 
-import { ViewCredentials } from "@/components/components/ViewCredentials";
 import { ViewMnemonics } from "@/components/components/ViewMnemonics";
+import Wallet from "@/components/components/Wallet";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,11 +12,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Keypair } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
-import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 interface WalletData {
@@ -29,7 +28,6 @@ export default function Page() {
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
-  const [isVisible, setIsVisible] = useState(false);
 
   // Get the values from localStorage
   const onMount = useEffectEvent(() => {
@@ -110,10 +108,6 @@ export default function Page() {
     });
   }
 
-  function copyToClipboard(privateKey: string) {
-    navigator.clipboard.writeText(privateKey);
-    alert("Private key copied!");
-  }
   return (
     <div className="bg-background mx-auto min-h-screen max-w-7xl">
       <section className="mx-auto mt-5 max-w-7xl">
@@ -123,7 +117,7 @@ export default function Page() {
               create-next-wallet@latest
             </CardTitle>
             <CardDescription>
-              Securely generate your wallet mnemonic phrase
+              Securely generate your wallet mnemonic phrases and wallets
             </CardDescription>
           </CardHeader>
 
@@ -170,86 +164,7 @@ export default function Page() {
           {/* All Wallets */}
           <ScrollArea className="bg-card/40 h-[60vh] w-[70%] overflow-hidden rounded-xl border-2 border-black/70 shadow-2xl [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
             {/* Viewport content */}
-            <div className="flex flex-col gap-3 p-4">
-              {wallets.map((wallet, id) => (
-                <Card key={id} className="border-2 border-black/70">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center justify-between text-2xl tracking-tight">
-                      Wallet {id}
-                      <div className="flex gap-1">
-                        <ViewCredentials publicKey={wallet.publicKey} />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="border-destructive shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)]"
-                          onClick={() => deleteWallet(id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-muted-foreground text-sm">
-                        Public Key
-                      </p>
-                      <p className="break-all">{wallet.publicKey}</p>
-                    </div>
-
-                    <Separator />
-
-                    <div>
-                      <p className="text-muted-foreground text-sm">
-                        Private Key
-                      </p>
-                      <div className="flex items-center justify-between">
-                        {isVisible ? (
-                          <>
-                            <p className="max-w-full break-all">
-                              {wallet.privateKey}
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <p>
-                              ************************************************************************************
-                            </p>
-                          </>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() => {
-                              setIsVisible(!isVisible);
-                            }}
-                            className="eyeButton"
-                          >
-                            {isVisible ? (
-                              <>
-                                <Eye />
-                              </>
-                            ) : (
-                              <>
-                                <EyeOff />
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              copyToClipboard(wallet.privateKey);
-                            }}
-                            className="copyButton"
-                          >
-                            Copy
-                          </Button>
-                        </div>
-                      </div>{" "}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Wallet wallets={wallets} onDeleteWallet={deleteWallet} />
           </ScrollArea>
         </section>
       </section>
