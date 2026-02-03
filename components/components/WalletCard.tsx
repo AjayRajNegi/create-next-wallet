@@ -33,7 +33,7 @@ export default function WalletCard({
     <Card className="border-2 border-black/70">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-2xl tracking-tight">
-          Wallet {index}
+          Wallet {index + 1}
           <div className="flex gap-1">
             <ViewCredentials publicKey={wallet.publicKey} />
             <Button

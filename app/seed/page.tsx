@@ -1,11 +1,10 @@
 "use client";
 
-import { ViewMnemonics } from "@/components/components/ViewMnemonics";
 import Wallet from "@/components/components/Wallet";
+import WalletHeader from "@/components/components/WalletHeader";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -15,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Keypair } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
-import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useState } from "react";
 
 interface WalletData {
@@ -25,9 +24,11 @@ interface WalletData {
 }
 
 export default function Page() {
+  const router = useRouter();
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
+  const [initialized, setInitialized] = useState(false);
 
   // Get the values from localStorage
   const onMount = useEffectEvent(() => {
@@ -40,27 +41,41 @@ export default function Page() {
       setSeed(Buffer.from(storedSeed, "hex"));
       setWallets(JSON.parse(storedWallets));
     }
+
+    setInitialized(true);
   });
 
   useEffect(() => {
     onMount();
   }, []);
 
+  useEffect(() => {
+    if (!initialized) return;
+    if (wallets.length === 0 && mnemonic.length === 0) {
+      localStorage.removeItem("mnemonic");
+      localStorage.removeItem("seed");
+      localStorage.removeItem("wallets");
+      router.push("/");
+    }
+  }, [wallets, initialized, router, mnemonic]);
+
   // Generate Mnemonics
   async function generateMnemonic() {
-    const generatedMnemonic = bip39.generateMnemonic();
-    const words = generatedMnemonic.split(" ");
+    if (mnemonic.length === 0) {
+      const generatedMnemonic = bip39.generateMnemonic();
+      const words = generatedMnemonic.split(" ");
 
-    setMnemonic(words);
-    localStorage.setItem("mnemonic", JSON.stringify(words));
+      setMnemonic(words);
+      localStorage.setItem("mnemonic", JSON.stringify(words));
 
-    const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
-    setSeed(generatedSeed);
-    localStorage.setItem("seed", generatedSeed.toString("hex"));
+      const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
+      setSeed(generatedSeed);
+      localStorage.setItem("seed", generatedSeed.toString("hex"));
 
-    await generateWallet(generatedSeed);
+      await generateWallet(generatedSeed);
+    }
+    return;
   }
-
   // Generate Wallets
   async function generateWallet(seed: Buffer | null) {
     if (!seed) {
@@ -111,27 +126,7 @@ export default function Page() {
   return (
     <div className="bg-background mx-auto min-h-screen max-w-7xl">
       <section className="mx-auto mt-5 max-w-7xl">
-        <Card className="mx-5 border-2 border-black/70 shadow-xl">
-          <CardHeader className="space-y-2 text-center">
-            <CardTitle className="text-5xl">
-              create-next-wallet@latest
-            </CardTitle>
-            <CardDescription>
-              Securely generate your wallet mnemonic phrases and wallets
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <Button className="w-full" size="lg" onClick={generateMnemonic}>
-              Generate Your Mnemonics <ChevronDown className="-rotate-90" />
-            </Button>
-            <ViewMnemonics mnemonic={mnemonic} />
-          </CardContent>
-
-          <CardFooter className="text-muted-foreground justify-center text-center text-xs">
-            Never share your mnemonic phrase with anyone.
-          </CardFooter>
-        </Card>
+        <WalletHeader mnemonic={mnemonic} generateMnemonic={generateMnemonic} />
 
         {/* Wallet */}
         <section className="mt-5 flex max-w-7xl justify-evenly">
