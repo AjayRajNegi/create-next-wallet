@@ -5,6 +5,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "../ui/button";
 import { ViewCredentials } from "./ViewCredentials";
+import { toast } from "sonner";
 
 interface WalletData {
   keyPair: Keypair;
@@ -26,7 +27,9 @@ export default function WalletCard({
 
   function copyToClipboard(privateKey: string) {
     navigator.clipboard.writeText(privateKey);
-    alert("Private key copied!");
+    toast.success("Copied Private Key to clipboard.", {
+      position: "top-center",
+    });
   }
 
   return (
@@ -39,8 +42,11 @@ export default function WalletCard({
             <Button
               variant="destructive"
               size="sm"
-              className="border-destructive shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)]"
-              onClick={() => onDelete(index)}
+              className="border-destructive shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:cursor-pointer hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)]"
+              onClick={() => {
+                onDelete(index);
+                toast.success("Wallet deleted.", { position: "top-center" });
+              }}
             >
               Delete
             </Button>
@@ -76,16 +82,16 @@ export default function WalletCard({
                 </p>
               </>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-[2px]">
               <Button
                 onClick={() => setIsVisible(!isVisible)}
-                className="eyeButton"
+                className="eyeButton hover:cursor-pointer"
               >
                 {isVisible ? <Eye /> : <EyeOff />}
               </Button>
               <Button
                 onClick={() => copyToClipboard(wallet.privateKey)}
-                className="copyButton"
+                className="copyButton hover:cursor-copy"
               >
                 Copy
               </Button>

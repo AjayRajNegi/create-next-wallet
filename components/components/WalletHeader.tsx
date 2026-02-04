@@ -1,5 +1,3 @@
-import { ChevronDown } from "lucide-react";
-import { Button } from "../ui/button";
 import {
   Card,
   CardHeader,
@@ -12,13 +10,9 @@ import { ViewMnemonics } from "./ViewMnemonics";
 
 interface WalletHeaderProps {
   mnemonic: string[];
-  generateMnemonic: () => void;
 }
 
-export default function WalletHeader({
-  mnemonic,
-  generateMnemonic,
-}: WalletHeaderProps) {
+export default function WalletHeader({ mnemonic }: WalletHeaderProps) {
   return (
     <Card className="mx-5 border-2 border-black/70 shadow-xl">
       <CardHeader className="space-y-2 text-center">
@@ -29,9 +23,6 @@ export default function WalletHeader({
       </CardHeader>
 
       <CardContent>
-        <Button className="w-full" size="lg" onClick={generateMnemonic}>
-          Generate Your Mnemonics <ChevronDown className="-rotate-90" />
-        </Button>
         <ViewMnemonics mnemonic={mnemonic} />
       </CardContent>
 

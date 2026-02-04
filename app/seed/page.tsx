@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Keypair } from "@solana/web3.js";
-import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
 import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useState } from "react";
+import { toast } from "sonner";
 
 interface WalletData {
   keyPair: Keypair;
@@ -59,23 +59,6 @@ export default function Page() {
     }
   }, [wallets, initialized, router, mnemonic]);
 
-  // Generate Mnemonics
-  async function generateMnemonic() {
-    if (mnemonic.length === 0) {
-      const generatedMnemonic = bip39.generateMnemonic();
-      const words = generatedMnemonic.split(" ");
-
-      setMnemonic(words);
-      localStorage.setItem("mnemonic", JSON.stringify(words));
-
-      const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
-      setSeed(generatedSeed);
-      localStorage.setItem("seed", generatedSeed.toString("hex"));
-
-      await generateWallet(generatedSeed);
-    }
-    return;
-  }
   // Generate Wallets
   async function generateWallet(seed: Buffer | null) {
     if (!seed) {
@@ -83,22 +66,21 @@ export default function Page() {
       return;
     }
 
-    setWallets((prev) => {
-      const walletIndex = prev.length;
-      const path = `m/44'/501'/${walletIndex}'/0'`;
-      const derivedSeed = derivePath(path, seed.toString("hex")).key;
-      const keyPair = Keypair.fromSeed(derivedSeed);
+    const walletIndex = wallets.length;
+    const path = `m/44'/501'/${walletIndex}'/0'`;
+    const derivedSeed = derivePath(path, seed.toString("hex")).key;
+    const keyPair = Keypair.fromSeed(derivedSeed);
 
-      const newWallet: WalletData = {
-        keyPair,
-        publicKey: keyPair.publicKey.toBase58(),
-        privateKey: Buffer.from(keyPair.secretKey).toString("hex"),
-      };
+    const newWallet: WalletData = {
+      keyPair,
+      publicKey: keyPair.publicKey.toBase58(),
+      privateKey: Buffer.from(keyPair.secretKey).toString("hex"),
+    };
 
-      const updated = [...prev, newWallet];
-      localStorage.setItem("wallets", JSON.stringify(updated));
-      return updated;
-    });
+    const updated = [...wallets, newWallet];
+    setWallets(updated);
+    localStorage.setItem("wallets", JSON.stringify(updated));
+    toast.success("Wallet Created!!", { position: "top-center" });
   }
 
   // Clear Wallets
@@ -107,6 +89,7 @@ export default function Page() {
     setSeed(null);
     setWallets([]);
     localStorage.clear();
+    toast.success("Cleared all Wallets.", { position: "top-center" });
   }
 
   // Delete Single Wallet
@@ -124,14 +107,14 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-background mx-auto min-h-screen max-w-7xl">
+    <div className="bg-background mx-auto h-fit max-w-7xl md:max-h-screen">
       <section className="mx-auto mt-5 max-w-7xl">
-        <WalletHeader mnemonic={mnemonic} generateMnemonic={generateMnemonic} />
+        <WalletHeader mnemonic={mnemonic} />
 
         {/* Wallet */}
-        <section className="mt-5 flex max-w-7xl justify-evenly">
+        <section className="mt-5 flex max-w-7xl flex-col items-center gap-5 md:flex-row md:justify-evenly md:gap-0">
           {/* New Wallet */}
-          <Card className="h-fit w-[25%] shrink-0 border-2 border-black/70 shadow-2xl">
+          <Card className="h-fit w-[90%] shrink-0 border-2 border-black/70 shadow-2xl md:w-[25%]">
             <CardHeader>
               <CardTitle className="text-4xl">Solana Wallets</CardTitle>
               <CardDescription>Manage your solana wallets.</CardDescription>
@@ -157,7 +140,7 @@ export default function Page() {
           </Card>
 
           {/* All Wallets */}
-          <ScrollArea className="bg-card/40 h-[60vh] w-[70%] overflow-hidden rounded-xl border-2 border-black/70 shadow-2xl [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
+          <ScrollArea className="bg-card/40 mb-5 h-[60vh] w-[90%] overflow-hidden rounded-xl border-2 border-black/70 shadow-2xl md:mb-0 md:w-[70%] [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
             {/* Viewport content */}
             <Wallet wallets={wallets} onDeleteWallet={deleteWallet} />
           </ScrollArea>
