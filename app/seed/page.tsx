@@ -112,7 +112,7 @@ export default function Page() {
         <WalletHeader mnemonic={mnemonic} />
 
         {/* Wallet */}
-        <section className="mt-5 flex max-w-7xl flex-col items-center gap-5 md:flex-row md:justify-evenly md:gap-0">
+        <section className="mt-5 flex max-w-7xl flex-col items-center gap-5 md:flex-row md:items-start md:justify-evenly md:gap-0">
           {/* New Wallet */}
           <Card className="h-fit w-[90%] shrink-0 border-2 border-black/70 shadow-2xl md:w-[25%]">
             <CardHeader>
