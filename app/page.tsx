@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import CryptoJS from "crypto-js";
 
 interface WalletData {
   keyPair: Keypair;
@@ -48,22 +49,31 @@ export default function Home() {
     }
   }, [seed, mnemonic, router, wallets]);
 
+  const dK = "a01387d6700297410683e33bc3887a52a16b87b078af431020c0841f285f583b";
+
   async function generateMnemonic() {
     const generatedMnemonic = bip39.generateMnemonic();
     const words = generatedMnemonic.split(" ");
 
     setMnemonic(words);
-    localStorage.setItem("mnemonic", JSON.stringify(words));
+
+    const encryptedMnemonic = encryptWithKey(JSON.stringify(words), dK);
+    localStorage.setItem("mnemonic", encryptedMnemonic);
     toast.success("Generated mnemonics.", { position: "top-center" });
 
     const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
     setSeed(generatedSeed);
     toast.success("Generated seed.", { position: "top-center" });
-    localStorage.setItem("seed", generatedSeed.toString("hex"));
+    const encryptedSeed = encryptWithKey(generatedSeed.toString("hex"), dK);
+    localStorage.setItem("seed", encryptedSeed);
 
     await generateWallet(generatedSeed);
 
     return;
+  }
+
+  function encryptWithKey(data: string, encryptionKey: string): string {
+    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
   }
 
   async function generateWallet(seed: Buffer | null) {
@@ -84,8 +94,10 @@ export default function Home() {
     };
 
     const updated = [...wallets, newWallet];
+    const encryptedWallets = encryptWithKey(JSON.stringify(updated), dK);
+
     setWallets(updated);
-    localStorage.setItem("wallets", JSON.stringify(updated));
+    localStorage.setItem("wallets", encryptedWallets);
     toast.success("Wallet Created!!", { position: "top-center" });
   }
 
@@ -95,14 +107,21 @@ export default function Home() {
       setSeed(seedFromInput);
       toast.success("Generated seed.", { position: "top-center" });
       const words = inputMnemonic.split(" ");
-      localStorage.setItem("mnemonic", JSON.stringify(words));
-      localStorage.setItem("seed", seedFromInput.toString("hex"));
+
+      const encryptedMnemonic = encryptWithKey(JSON.stringify(words), dK);
+      localStorage.setItem("mnemonic", encryptedMnemonic);
       toast.success("Generated mnemonics.", { position: "top-center" });
+
+      const encryptedSeed = encryptWithKey(seedFromInput.toString("hex"), dK);
+      localStorage.setItem("seed", encryptedSeed);
+      toast.success("Generated mnemonics.", { position: "top-center" });
+
       await generateWallet(seedFromInput);
       router.push("/seed");
     }
     return;
   }
+
   return (
     <section className="flex min-h-screen items-center justify-center p-4 md:h-screen md:p-0">
       <Card className="w-full border-2 border-black/70 pt-6 shadow-xl md:w-auto md:pt-10">

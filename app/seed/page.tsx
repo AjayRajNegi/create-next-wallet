@@ -1,5 +1,6 @@
 "use client";
 
+import CryptoJS from "crypto-js";
 import Wallet from "@/components/components/Wallet";
 import WalletHeader from "@/components/components/WalletHeader";
 import { Button } from "@/components/ui/button";
@@ -30,20 +31,56 @@ export default function Page() {
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [initialized, setInitialized] = useState(false);
 
+  const dK = "a01387d6700297410683e33bc3887a52a16b87b078af431020c0841f285f583b";
+
+  function decryptWithKey(
+    encryptedData: string,
+    encryptionKey: string,
+  ): string {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  }
+
   // Get the values from localStorage
   const onMount = useEffectEvent(() => {
+    if (!dK) {
+      console.log("Encryption key not ready yet");
+      return;
+    }
+
     const storedMnemonic = localStorage.getItem("mnemonic");
     const storedSeed = localStorage.getItem("seed");
     const storedWallets = localStorage.getItem("wallets");
 
     if (storedMnemonic && storedSeed && storedWallets) {
-      setMnemonic(JSON.parse(storedMnemonic));
-      setSeed(Buffer.from(storedSeed, "hex"));
-      setWallets(JSON.parse(storedWallets));
+      try {
+        const decryptedMnemonic = decryptWithKey(storedMnemonic, dK);
+        setMnemonic(JSON.parse(decryptedMnemonic));
+
+        const decryptedSeed = decryptWithKey(storedSeed, dK);
+        setSeed(Buffer.from(decryptedSeed, "hex"));
+
+        const decryptedWallets = decryptWithKey(storedWallets, dK);
+        setWallets(JSON.parse(decryptedWallets));
+
+        toast.success("Wallet loaded successfully", { position: "top-center" });
+      } catch (error) {
+        console.error("Decryption failed:", error);
+        toast.error("Failed to decrypt wallet data - wrong password?", {
+          position: "top-center",
+        });
+        localStorage.clear();
+      }
     }
 
     setInitialized(true);
   });
+
+  useEffect(() => {
+    if (dK) {
+      onMount();
+    }
+  }, [dK]);
 
   useEffect(() => {
     onMount();
