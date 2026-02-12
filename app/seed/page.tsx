@@ -116,7 +116,9 @@ export default function Page() {
 
     const updated = [...wallets, newWallet];
     setWallets(updated);
-    localStorage.setItem("wallets", JSON.stringify(updated));
+
+    const encryptedWallets = encryptWithKey(JSON.stringify(updated), dK);
+    localStorage.setItem("wallets", encryptedWallets);
     toast.success("Wallet Created!!", { position: "top-center" });
   }
 
@@ -133,7 +135,8 @@ export default function Page() {
   function deleteWallet(id: number) {
     setWallets((prev) => {
       const updated = prev.filter((_, index) => index !== id);
-      localStorage.setItem("wallets", JSON.stringify(updated));
+      const encryptedWallets = encryptWithKey(JSON.stringify(updated), dK);
+      localStorage.setItem("wallets", encryptedWallets);
 
       if (updated.length === 0) {
         clearWallet();
@@ -141,6 +144,10 @@ export default function Page() {
 
       return updated;
     });
+  }
+
+  function encryptWithKey(data: string, encryptionKey: string): string {
+    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
   }
 
   return (

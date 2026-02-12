@@ -103,6 +103,11 @@ export default function Home() {
 
   async function generateSeedFromInputMnemonics() {
     if (inputMnemonic.length !== 0) {
+      const isValidMnemonics = bip39.validateMnemonic(inputMnemonic);
+      if (!isValidMnemonics) {
+        toast.error("Input valid mnemonics");
+        return;
+      }
       const seedFromInput = bip39.mnemonicToSeedSync(inputMnemonic);
       setSeed(seedFromInput);
       toast.success("Generated seed.", { position: "top-center" });
