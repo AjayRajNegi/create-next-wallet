@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import CryptoJS from "crypto-js";
+import { useKey } from "@/context/KeyContext";
 
 interface WalletData {
   keyPair: Keypair;
@@ -24,10 +25,12 @@ interface WalletData {
 }
 export default function Home() {
   const router = useRouter();
+  const { setKey } = useKey();
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [inputMnemonic, setInputMnemonic] = useState<string>("");
+  const [userKey, setUserKey] = useState<string>("");
 
   const onMount = useEffectEvent(() => {
     const storedMnemonic = localStorage.getItem("mnemonic");
@@ -43,39 +46,38 @@ export default function Home() {
     onMount();
   }, []);
 
+  // Check for data in localStorage
   useEffect(() => {
     if (seed && mnemonic.length > 0 && wallets.length > 0) {
       router.push("/seed");
     }
   }, [seed, mnemonic, router, wallets]);
 
-  const dK = "a01387d6700297410683e33bc3887a52a16b87b078af431020c0841f285f583b";
-
+  // Generate Mnemonics
   async function generateMnemonic() {
     const generatedMnemonic = bip39.generateMnemonic();
     const words = generatedMnemonic.split(" ");
 
     setMnemonic(words);
 
-    const encryptedMnemonic = encryptWithKey(JSON.stringify(words), dK);
+    const encryptedMnemonic = encryptWithKey(JSON.stringify(words), userKey);
     localStorage.setItem("mnemonic", encryptedMnemonic);
     toast.success("Generated mnemonics.", { position: "top-center" });
 
     const generatedSeed = bip39.mnemonicToSeedSync(generatedMnemonic);
     setSeed(generatedSeed);
     toast.success("Generated seed.", { position: "top-center" });
-    const encryptedSeed = encryptWithKey(generatedSeed.toString("hex"), dK);
+    const encryptedSeed = encryptWithKey(
+      generatedSeed.toString("hex"),
+      userKey,
+    );
     localStorage.setItem("seed", encryptedSeed);
-
     await generateWallet(generatedSeed);
 
     return;
   }
 
-  function encryptWithKey(data: string, encryptionKey: string): string {
-    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
-  }
-
+  // Generate first wallet
   async function generateWallet(seed: Buffer | null) {
     if (!seed) {
       alert("Generate Mnemonics first!");
@@ -94,13 +96,14 @@ export default function Home() {
     };
 
     const updated = [...wallets, newWallet];
-    const encryptedWallets = encryptWithKey(JSON.stringify(updated), dK);
+    const encryptedWallets = encryptWithKey(JSON.stringify(updated), userKey);
 
     setWallets(updated);
     localStorage.setItem("wallets", encryptedWallets);
     toast.success("Wallet Created!!", { position: "top-center" });
   }
 
+  // Generate seed from the input mnemonics
   async function generateSeedFromInputMnemonics() {
     if (inputMnemonic.length !== 0) {
       const isValidMnemonics = bip39.validateMnemonic(inputMnemonic);
@@ -113,11 +116,14 @@ export default function Home() {
       toast.success("Generated seed.", { position: "top-center" });
       const words = inputMnemonic.split(" ");
 
-      const encryptedMnemonic = encryptWithKey(JSON.stringify(words), dK);
+      const encryptedMnemonic = encryptWithKey(JSON.stringify(words), userKey);
       localStorage.setItem("mnemonic", encryptedMnemonic);
       toast.success("Generated mnemonics.", { position: "top-center" });
 
-      const encryptedSeed = encryptWithKey(seedFromInput.toString("hex"), dK);
+      const encryptedSeed = encryptWithKey(
+        seedFromInput.toString("hex"),
+        userKey,
+      );
       localStorage.setItem("seed", encryptedSeed);
       toast.success("Generated mnemonics.", { position: "top-center" });
 
@@ -127,8 +133,29 @@ export default function Home() {
     return;
   }
 
+  // Get the encryption key from the user
+  function addUserKey(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (userKey) {
+      setKey(userKey);
+    }
+  }
+
+  // Encrypt the data
+  function encryptWithKey(data: string, encryptionKey: string): string {
+    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
+  }
+
   return (
     <section className="flex min-h-screen items-center justify-center p-4 md:h-screen md:p-0">
+      <form onSubmit={addUserKey}>
+        <Input
+          placeholder="Add Key"
+          value={userKey}
+          onChange={(e) => setUserKey(e.target.value)}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
       <Card className="w-full border-2 border-black/70 pt-6 shadow-xl md:w-auto md:pt-10">
         <CardHeader className="space-y-2 py-6 text-center md:py-10">
           <CardTitle className="text-4xl md:text-5xl">

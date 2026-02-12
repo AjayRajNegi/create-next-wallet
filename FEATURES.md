@@ -314,3 +314,51 @@ Display wallet info (never send decrypted data to server)
 **Is it safe?** Yes, if implemented correctly, this is actually more secure than storing wallet data on your server. But the implementation details matter enormously - use well-tested crypto libraries and be very careful with key derivation.
 
 Would you like guidance on the specific crypto libraries to use or code examples?
+
+2️⃣ Prefix-Based Style (Very Common)
+
+Start with a keyword that categorizes the change.
+
+Examples:
+
+Fix: Hydration error caused by input
+
+Feat: Add password visibility toggle
+
+Docs: Update README installation steps
+
+Refactor: Simplify auth logic
+
+Common prefixes:
+
+Feat: → new feature
+
+Fix: → bug fix
+
+Docs: → documentation
+
+Style: → formatting, spacing
+
+Refactor: → code improvement without behavior change
+
+Test: → adding/updating tests
+
+Chore: → maintenance work
+
+Perf: → performance improvement
+
+3️⃣ Conventional Commits (Professional / Team Standard)
+
+A more structured version of prefix style:
+
+type(scope): short description
+
+Examples:
+
+fix(auth): resolve hydration error from input state
+
+feat(ui): add password visibility toggle
+
+refactor(api): simplify token validation logic
+
+docs(readme): update setup instructions
