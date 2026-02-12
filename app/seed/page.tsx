@@ -1,5 +1,6 @@
 "use client";
 
+import CryptoJS from "crypto-js";
 import Wallet from "@/components/components/Wallet";
 import WalletHeader from "@/components/components/WalletHeader";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { derivePath } from "ed25519-hd-key";
 import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useState } from "react";
 import { toast } from "sonner";
+import { useKey } from "@/context/KeyContext";
 
 interface WalletData {
   keyPair: Keypair;
@@ -23,31 +25,62 @@ interface WalletData {
   privateKey: string;
 }
 
+function decryptWithKey(encryptedData: string, encryptionKey: string): string {
+  const bytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
+
+function encryptWithKey(data: string, encryptionKey: string): string {
+  return CryptoJS.AES.encrypt(data, encryptionKey).toString();
+}
+
 export default function Page() {
   const router = useRouter();
+  const { key } = useKey();
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [initialized, setInitialized] = useState(false);
 
-  // Get the values from localStorage
   const onMount = useEffectEvent(() => {
+    if (!key) {
+      console.log("Encryption key not ready yet");
+      return;
+    }
+
     const storedMnemonic = localStorage.getItem("mnemonic");
     const storedSeed = localStorage.getItem("seed");
     const storedWallets = localStorage.getItem("wallets");
 
     if (storedMnemonic && storedSeed && storedWallets) {
-      setMnemonic(JSON.parse(storedMnemonic));
-      setSeed(Buffer.from(storedSeed, "hex"));
-      setWallets(JSON.parse(storedWallets));
+      try {
+        const decryptedMnemonic = decryptWithKey(storedMnemonic, key);
+        setMnemonic(JSON.parse(decryptedMnemonic));
+
+        const decryptedSeed = decryptWithKey(storedSeed, key);
+        setSeed(Buffer.from(decryptedSeed, "hex"));
+
+        const decryptedWallets = decryptWithKey(storedWallets, key);
+        setWallets(JSON.parse(decryptedWallets));
+
+        toast.success("Wallet loaded successfully", { position: "top-center" });
+      } catch (error) {
+        console.error("Decryption failed:", error);
+        toast.error("Failed to decrypt wallet data - wrong password?", {
+          position: "top-center",
+        });
+        localStorage.clear();
+      }
     }
 
     setInitialized(true);
   });
 
   useEffect(() => {
-    onMount();
-  }, []);
+    if (key) {
+      onMount();
+    }
+  }, [key]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -79,12 +112,14 @@ export default function Page() {
 
     const updated = [...wallets, newWallet];
     setWallets(updated);
-    localStorage.setItem("wallets", JSON.stringify(updated));
+
+    const encryptedWallets = encryptWithKey(JSON.stringify(updated), key);
+    localStorage.setItem("wallets", encryptedWallets);
     toast.success("Wallet Created!!", { position: "top-center" });
   }
 
   // Clear Wallets
-  function clearWallet() {
+  async function clearWallet() {
     setMnemonic([]);
     setSeed(null);
     setWallets([]);
@@ -93,10 +128,11 @@ export default function Page() {
   }
 
   // Delete Single Wallet
-  function deleteWallet(id: number) {
+  async function deleteWallet(id: number) {
     setWallets((prev) => {
       const updated = prev.filter((_, index) => index !== id);
-      localStorage.setItem("wallets", JSON.stringify(updated));
+      const encryptedWallets = encryptWithKey(JSON.stringify(updated), key);
+      localStorage.setItem("wallets", encryptedWallets);
 
       if (updated.length === 0) {
         clearWallet();
