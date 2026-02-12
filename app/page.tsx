@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import * as bip39 from "bip39";
 import { useRouter } from "next/navigation";
 import { Keypair } from "@solana/web3.js";
@@ -23,6 +23,12 @@ interface WalletData {
   publicKey: string;
   privateKey: string;
 }
+
+// Encrypt the data
+function encryptWithKey(data: string, encryptionKey: string): string {
+  return CryptoJS.AES.encrypt(data, encryptionKey).toString();
+}
+
 export default function Home() {
   const router = useRouter();
   const { setKey } = useKey();
@@ -32,7 +38,7 @@ export default function Home() {
   const [inputMnemonic, setInputMnemonic] = useState<string>("");
   const [userKey, setUserKey] = useState<string>("");
 
-  const onMount = useEffectEvent(() => {
+  const onMount = () => {
     const storedMnemonic = localStorage.getItem("mnemonic");
     const storedSeed = localStorage.getItem("seed");
     const storedWallets = localStorage.getItem("wallets");
@@ -40,11 +46,7 @@ export default function Home() {
     if (storedMnemonic && storedSeed && storedWallets) {
       router.push("/seed");
     }
-  });
-
-  useEffect(() => {
-    onMount();
-  }, []);
+  };
 
   // Check for data in localStorage
   useEffect(() => {
@@ -55,6 +57,10 @@ export default function Home() {
 
   // Generate Mnemonics
   async function generateMnemonic() {
+    if (!userKey) {
+      toast("Generate Key!!");
+      return;
+    }
     const generatedMnemonic = bip39.generateMnemonic();
     const words = generatedMnemonic.split(" ");
 
@@ -79,6 +85,10 @@ export default function Home() {
 
   // Generate first wallet
   async function generateWallet(seed: Buffer | null) {
+    if (!userKey) {
+      toast("Generate Key!!");
+      return;
+    }
     if (!seed) {
       alert("Generate Mnemonics first!");
       return;
@@ -105,6 +115,10 @@ export default function Home() {
 
   // Generate seed from the input mnemonics
   async function generateSeedFromInputMnemonics() {
+    if (!userKey) {
+      toast("Generate Key!!");
+      return;
+    }
     if (inputMnemonic.length !== 0) {
       const isValidMnemonics = bip39.validateMnemonic(inputMnemonic);
       if (!isValidMnemonics) {
@@ -134,72 +148,84 @@ export default function Home() {
   }
 
   // Get the encryption key from the user
-  function addUserKey(e: React.FormEvent<HTMLFormElement>) {
+  async function addUserKey(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (userKey) {
       setKey(userKey);
+      onMount();
     }
-  }
-
-  // Encrypt the data
-  function encryptWithKey(data: string, encryptionKey: string): string {
-    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
   }
 
   return (
     <section className="flex min-h-screen items-center justify-center p-4 md:h-screen md:p-0">
-      <form onSubmit={addUserKey}>
-        <Input
-          placeholder="Add Key"
-          value={userKey}
-          onChange={(e) => setUserKey(e.target.value)}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-      <Card className="w-full border-2 border-black/70 pt-6 shadow-xl md:w-auto md:pt-10">
-        <CardHeader className="space-y-2 py-6 text-center md:py-10">
-          <CardTitle className="text-4xl md:text-5xl">
-            create-next-wallet@latest
-          </CardTitle>
-          <CardDescription className="text-sm md:text-base">
-            Securely generate your wallet mnemonic phrases and wallets
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 md:px-6">
-          <Card className="w-full gap-0 border-[2px] border-black/70 py-4 text-black md:w-5xl">
-            <CardHeader className="px-4 py-0">Add your phrases</CardHeader>
-            <CardContent className="m flex w-full flex-col items-stretch gap-2 p-4 py-2 md:flex-row md:items-center">
+      <div className="flex flex-col items-end gap-2 md:flex-row">
+        <Card className="w-[90%] border-2 border-black/70 pt-6 shadow-xl md:w-auto md:pt-10">
+          <CardHeader className="space-y-2 py-6 text-center md:py-10">
+            <CardTitle className="text-4xl md:text-5xl">
+              create-next-wallet@latest
+            </CardTitle>
+            <CardDescription className="text-sm md:text-base">
+              Securely generate your wallet mnemonic phrases and wallets
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 md:px-6">
+            <Card className="w-full gap-0 border-[2px] border-black/70 py-4 text-black md:w-4xl">
+              <CardHeader className="px-4 py-0">Add your phrases</CardHeader>
+              <CardContent className="flex w-full flex-col items-stretch gap-2 p-4 py-2 md:flex-row md:items-center">
+                <Input
+                  type="text"
+                  className="h-[44px] md:mt-1 md:mr-2"
+                  placeholder="If you do not have phrases just click on Generate."
+                  onChange={(e) => setInputMnemonic(e.target.value)}
+                />
+
+                <div className="flex w-full gap-0 md:w-auto">
+                  <Button
+                    className="flex-1 rounded-r-none shadow-[0px_4px_0px_0px_rgba(0,0,0)] hover:translate-y-[4px] hover:shadow-none md:flex-none"
+                    size="lg"
+                    onClick={() => {
+                      generateSeedFromInputMnemonics();
+                    }}
+                  >
+                    Add
+                  </Button>
+
+                  <Button
+                    className="hover:border-l-primary/50 flex-1 rounded-l-none border-l-1 border-l-black shadow-[0px_4px_0px_0px_rgba(0,0,0)] hover:translate-y-[4px] hover:shadow-none md:flex-none"
+                    size="lg"
+                    onClick={generateMnemonic}
+                  >
+                    Generate
+                    <ChevronDown className="-rotate-90" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+        <Card className="gap-2 border-2 border-black/70 p-4 shadow-xl">
+          <form onSubmit={addUserKey} className="">
+            <h4 className="mb-2">Enter Secret Key</h4>
+            <div className="flex items-center gap-2">
               <Input
-                type="text"
-                className="h-[44px] md:mt-1 md:mr-2"
-                placeholder="If you do not have phrases just click on Generate."
-                onChange={(e) => setInputMnemonic(e.target.value)}
+                placeholder="Key to ENCRYPT data."
+                type="password"
+                value={userKey}
+                className="mt-1 h-[38px]"
+                onChange={(e) => setUserKey(e.target.value)}
               />
 
-              <div className="flex w-full gap-0 md:w-auto">
-                <Button
-                  className="flex-1 rounded-r-none shadow-[0px_4px_0px_0px_rgba(0,0,0)] hover:translate-y-[4px] hover:shadow-none md:flex-none"
-                  size="lg"
-                  onClick={() => {
-                    generateSeedFromInputMnemonics();
-                  }}
-                >
-                  Add
-                </Button>
-
-                <Button
-                  className="hover:border-l-primary/50 flex-1 rounded-l-none border-l-1 border-l-black shadow-[0px_4px_0px_0px_rgba(0,0,0)] hover:translate-y-[4px] hover:shadow-none md:flex-none"
-                  size="lg"
-                  onClick={generateMnemonic}
-                >
-                  Generate
-                  <ChevronDown className="-rotate-90" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </CardContent>
-      </Card>
+              <Button
+                type="submit"
+                size="sm"
+                className="shadow-[0px_4px_0px_0px_rgba(0,0,0)] hover:translate-y-[4px] hover:shadow-none"
+              >
+                Submit
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
     </section>
   );
 }

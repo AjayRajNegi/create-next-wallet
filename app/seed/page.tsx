@@ -25,6 +25,15 @@ interface WalletData {
   privateKey: string;
 }
 
+function decryptWithKey(encryptedData: string, encryptionKey: string): string {
+  const bytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
+
+function encryptWithKey(data: string, encryptionKey: string): string {
+  return CryptoJS.AES.encrypt(data, encryptionKey).toString();
+}
+
 export default function Page() {
   const router = useRouter();
   const { key } = useKey();
@@ -32,14 +41,6 @@ export default function Page() {
   const [seed, setSeed] = useState<Buffer | null>(null);
   const [wallets, setWallets] = useState<WalletData[]>([]);
   const [initialized, setInitialized] = useState(false);
-
-  function decryptWithKey(
-    encryptedData: string,
-    encryptionKey: string,
-  ): string {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
-    return bytes.toString(CryptoJS.enc.Utf8);
-  }
 
   const onMount = useEffectEvent(() => {
     if (!key) {
@@ -82,14 +83,6 @@ export default function Page() {
   }, [key]);
 
   useEffect(() => {
-    onMount();
-  }, []);
-
-  if (key) {
-    console.log("je", key);
-  }
-
-  useEffect(() => {
     if (!initialized) return;
     if (wallets.length === 0 && mnemonic.length === 0) {
       localStorage.removeItem("mnemonic");
@@ -126,7 +119,7 @@ export default function Page() {
   }
 
   // Clear Wallets
-  function clearWallet() {
+  async function clearWallet() {
     setMnemonic([]);
     setSeed(null);
     setWallets([]);
@@ -135,7 +128,7 @@ export default function Page() {
   }
 
   // Delete Single Wallet
-  function deleteWallet(id: number) {
+  async function deleteWallet(id: number) {
     setWallets((prev) => {
       const updated = prev.filter((_, index) => index !== id);
       const encryptedWallets = encryptWithKey(JSON.stringify(updated), key);
@@ -147,10 +140,6 @@ export default function Page() {
 
       return updated;
     });
-  }
-
-  function encryptWithKey(data: string, encryptionKey: string): string {
-    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
   }
 
   return (
