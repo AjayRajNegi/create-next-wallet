@@ -163,7 +163,7 @@ export default function Home() {
         <ModeToggle />
       </div>
       <div className="flex flex-col items-end gap-2 md:flex-row">
-        <Card className="w-[90%] border-2 border-black/70 pt-6 shadow-xl md:w-auto md:pt-10">
+        <Card className="border-foreground/70 w-[90%] border-2 pt-6 shadow-xl md:w-auto md:pt-10">
           <CardHeader className="space-y-2 py-6 text-center md:py-10">
             <CardTitle className="text-4xl md:text-5xl">
               create-next-wallet@latest
@@ -173,7 +173,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-4 md:px-6">
-            <Card className="w-full gap-0 border-[2px] border-black/70 py-4 text-black md:w-4xl">
+            <Card className="border-foreground/70 py- 4 w-full gap-0 border-[2px] text-black md:w-4xl">
               <CardHeader className="text-foreground px-4 py-0">
                 Add your phrases
               </CardHeader>
@@ -209,10 +209,10 @@ export default function Home() {
             </Card>
           </CardContent>
         </Card>
-        <Card className="gap-2 border-2 border-black/70 p-4 shadow-xl">
+        <Card className="border-foreground/70 gap-2 border-2 p-4 shadow-xl">
           <form onSubmit={addUserKey} className="">
             <h4 className="mb-2">Enter Secret Key</h4>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <Input
                 placeholder="Key to ENCRYPT data."
                 type="password"

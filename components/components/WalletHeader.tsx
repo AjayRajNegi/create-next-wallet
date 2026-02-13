@@ -14,7 +14,7 @@ interface WalletHeaderProps {
 
 export default function WalletHeader({ mnemonic }: WalletHeaderProps) {
   return (
-    <Card className="mx-5 border-2 border-black/70 shadow-xl">
+    <Card className="border-foreground/70 mx-5 border-2 shadow-xl">
       <CardHeader className="space-y-2 text-center">
         <CardTitle className="text-5xl">create-next-wallet@latest</CardTitle>
         <CardDescription>

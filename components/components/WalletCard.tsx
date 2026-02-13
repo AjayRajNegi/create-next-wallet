@@ -33,7 +33,7 @@ export default function WalletCard({
   }
 
   return (
-    <Card className="border-2 border-black/70">
+    <Card className="border-foreground/70 border-2">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-2xl tracking-tight">
           Wallet {index + 1}

@@ -154,7 +154,7 @@ export default function Page() {
         {/* Wallet */}
         <section className="mt-5 flex max-w-7xl flex-col items-center gap-5 md:flex-row md:items-start md:justify-evenly md:gap-0">
           {/* New Wallet */}
-          <Card className="h-fit w-[90%] shrink-0 border-2 border-black/70 shadow-2xl md:w-[25%]">
+          <Card className="border-foreground/70 h-fit w-[90%] shrink-0 border-2 shadow-2xl md:w-[25%]">
             <CardHeader>
               <CardTitle className="text-4xl">Solana Wallets</CardTitle>
               <CardDescription>Manage your solana wallets.</CardDescription>
@@ -180,7 +180,7 @@ export default function Page() {
           </Card>
 
           {/* All Wallets */}
-          <ScrollArea className="bg-card/40 mb-5 h-[60vh] w-[90%] overflow-hidden rounded-xl border-2 border-black/70 shadow-2xl md:mb-0 md:w-[70%] [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
+          <ScrollArea className="bg-card/40 border-foreground/70 mb-5 h-[60vh] w-[90%] overflow-hidden rounded-xl border-2 shadow-2xl md:mb-0 md:w-[70%] [&_[data-radix-scroll-area-scrollbar]]:hidden [&_[data-radix-scroll-area-viewport]]:pr-0">
             {/* Viewport content */}
             <Wallet wallets={wallets} onDeleteWallet={deleteWallet} />
           </ScrollArea>
