@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import CryptoJS from "crypto-js";
 import { useKey } from "@/context/KeyContext";
+import { ModeToggle } from "@/components/ui/ModeToggle";
 
 interface WalletData {
   keyPair: Keypair;
@@ -157,7 +158,10 @@ export default function Home() {
   }
 
   return (
-    <section className="flex min-h-screen items-center justify-center p-4 md:h-screen md:p-0">
+    <section className="relative flex min-h-screen items-center justify-center p-4 md:h-screen md:p-0">
+      <div className="absolute top-5 right-5">
+        <ModeToggle />
+      </div>
       <div className="flex flex-col items-end gap-2 md:flex-row">
         <Card className="w-[90%] border-2 border-black/70 pt-6 shadow-xl md:w-auto md:pt-10">
           <CardHeader className="space-y-2 py-6 text-center md:py-10">
@@ -170,7 +174,9 @@ export default function Home() {
           </CardHeader>
           <CardContent className="px-4 md:px-6">
             <Card className="w-full gap-0 border-[2px] border-black/70 py-4 text-black md:w-4xl">
-              <CardHeader className="px-4 py-0">Add your phrases</CardHeader>
+              <CardHeader className="text-foreground px-4 py-0">
+                Add your phrases
+              </CardHeader>
               <CardContent className="flex w-full flex-col items-stretch gap-2 p-4 py-2 md:flex-row md:items-center">
                 <Input
                   type="text"

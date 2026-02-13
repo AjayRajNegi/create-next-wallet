@@ -3,6 +3,7 @@ import "./globals.css";
 import { Oxanium } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { DataProvider } from "@/context/KeyContext";
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
 
 const oxanium = Oxanium({
   variable: "--font-oxanium",
@@ -20,9 +21,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${oxanium.variable} bg-background antialiased`}>
-        <DataProvider>{children}</DataProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <DataProvider>{children}</DataProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

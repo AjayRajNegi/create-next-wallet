@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useState } from "react";
 import { toast } from "sonner";
 import { useKey } from "@/context/KeyContext";
+import { ModeToggle } from "@/components/ui/ModeToggle";
 
 interface WalletData {
   keyPair: Keypair;
@@ -143,7 +144,10 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-background mx-auto h-fit max-w-7xl md:max-h-screen">
+    <div className="bg-background relative mx-auto h-fit max-w-7xl md:max-h-screen">
+      <div className="absolute top-5 right-10">
+        <ModeToggle />
+      </div>
       <section className="mx-auto mt-5 max-w-7xl">
         <WalletHeader mnemonic={mnemonic} />
 

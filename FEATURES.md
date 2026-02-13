@@ -10,23 +10,23 @@ This document lists the key areas to focus on to evolve this Solana wallet proje
 
 ---
 
-## 1. Security & Key Management (P0)
+## 1. ~~Security & Key Management (P0)~~
 
-- **Move away from plaintext `localStorage` for secrets**
+- **~~Move away from plaintext `localStorage` for secrets~~**
   - Today: mnemonics, seeds and private keys are stored unencrypted in `localStorage`, which is easily accessible via DevTools, browser extensions, and any XSS.
   - Target:
     - Use a **password-based key** (e.g. PBKDF2/argon2id over a user-chosen passphrase) to encrypt mnemonic/seed/private keys before persisting.
     - Store only encrypted blobs in `localStorage` or `IndexedDB`; never store raw mnemonics/private keys.
     - Implement a **lock screen** / re-auth gate that decrypts keys into memory only when the user explicitly unlocks the wallet, with auto-lock on inactivity or tab close.
 
-- **Explicit non-custodial model and threat model**
+- **~~Explicit non-custodial model and threat model~~**
   - Clearly define whether the app is **purely client-side non-custodial** (no keys ever touch a server).
   - Document a basic threat model:
     - What happens if device is stolen?
     - What if browser is compromised or malware is installed?
     - What protections the app does and does not provide.
 
-- **Mnemonic and seed handling best practices**
+- **~~Mnemonic and seed handling best practices~~**
   - Validate mnemonics with `bip39.validateMnemonic()` before converting to seeds or deriving wallets.
   - Enforce allowed word counts (12/15/18/21/24) and provide user-friendly error messages for invalid phrases.
   - Avoid showing the full mnemonic by default; require an explicit user action, with clear warnings, before revealing.
@@ -34,19 +34,19 @@ This document lists the key areas to focus on to evolve this Solana wallet proje
     - A confirmation dialog.
     - A visual warning that the clipboard can be read by other apps.
 
-- **Reduce attack surface for secrets in memory**
+- **~~Reduce attack surface for secrets in memory~~**
   - Only derive keypairs when needed (e.g. when sending or signing), not on every render.
   - Avoid keeping seed/mnemonic in long-lived component state if possible; prefer ephemeral variables scoped to operations or locked state.
   - Consider splitting responsibilities:
     - One layer that manages encrypted blobs.
     - One layer that derives short-lived `Keypair`s when needed.
 
-- **Harden against XSS and content injection**
+- **~~Harden against XSS and content injection~~**
   - Audit all user inputs (mnemonic input, future forms) for any `dangerouslySetInnerHTML` or untrusted HTML usage (currently none, keep it that way).
   - Consider using a CSP (Content Security Policy) in production to reduce risk of inline script injection.
   - Avoid adding libraries that evaluate arbitrary strings or HTML without sanitization.
 
-- **No secret logging**
+- **~~No secret logging~~**
   - Ensure no `console.log` calls ever print mnemonics, seeds, derivation paths, or private keys (keep this invariant as you add features).
   - Replace generic `console.log(error)` with structured error logging that never includes secret values.
 
